@@ -1,4 +1,5 @@
-{**
+<?php
+/**
  * Copyright (C) 2014  Pablo Villoslada Puigcerber
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,9 +15,18 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *}
-<!-- Block holidayalert -->
-<div class="alert alert-{$pvp_alert_class|escape:'html'}">
-    {$pvp_alert_message|escape:'html'} 
-</div>
-<!-- /Block holidayalert -->
+ * 
+ * @author    Pablo Villoslada Puigcerber
+ * @copyright 2014 Pablo Villoslada Puigcerber
+ * @license   http://www.gnu.org/licenses/gpl-2.0.txt
+ */
+
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
+
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+
+header('Location: ../');
+exit;

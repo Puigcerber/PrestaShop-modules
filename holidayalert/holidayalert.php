@@ -1,4 +1,25 @@
 <?php
+/**
+ * Copyright (C) 2014  Pablo Villoslada Puigcerber
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * 
+ * @author    Pablo Villoslada Puigcerber
+ * @copyright 2014 Pablo Villoslada Puigcerber
+ * @license   http://www.gnu.org/licenses/gpl-2.0.txt
+ */
 
 if (!defined('_PS_VERSION_'))
   exit;
@@ -20,11 +41,11 @@ class HolidayAlert extends Module
         $this->description = $this->l('Set a message to alert your clients that the shop is on holiday.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
-        
-        if (!Configuration::get('PVP_ALERT_CLASS'))  
+
+        if (!Configuration::get('PVP_ALERT_CLASS'))
             $this->warning = $this->l('No alert class provided');
     }
-  
+
     public function install()
     {
         if (Shop::isFeatureActive())
@@ -36,51 +57,48 @@ class HolidayAlert extends Module
                 Configuration::updateValue('PVP_ALERT_CLASS', 'info') &&
                 Configuration::updateValue('PVP_ALERT_MESSAGE', 'This is a sample message.');
     }
-     
+
     public function uninstall()
     {
-        return parent::uninstall() && 
+        return parent::uninstall() &&
                 Configuration::deleteByName('PVP_ALERT_CLASS') &&
                 Configuration::deleteByName('PVP_ALERT_MESSAGE');
     }
-    
-    public function hookDisplayTop($params)
+
+    public function hookDisplayTop()
     {
         $this->context->smarty->assign(
                 array(
                     'pvp_alert_class' => Configuration::get('PVP_ALERT_CLASS'),
                     'pvp_alert_message' => Configuration::get('PVP_ALERT_MESSAGE'),
-                    
                 )
         );
         return $this->display(__FILE__, 'holidayalert.tpl');
     }
-    
-    public function hookDisplayShoppingCart($params)
+
+    public function hookDisplayShoppingCart()
     {
-        return $this->hookDisplayTop($params);
+        return $this->hookDisplayTop();
     }
-    
+
     public function hookDisplayHeader()
     {
       $this->context->controller->addCSS($this->_path.'css/holidayalert.css', 'all');
     }
-    
+
     public function getContent()
     {
         $output = null;
 
         if (Tools::isSubmit('submit'.$this->name))
         {
-            $pvp_alert_class = strval(Tools::getValue('PVP_ALERT_CLASS'));
-            $pvp_alert_message = strval(Tools::getValue('PVP_ALERT_MESSAGE'));
-            if (!$pvp_alert_class  || empty($pvp_alert_class) || !Validate::isGenericName($pvp_alert_class)) {
-                $output .= $this->displayError( $this->l('Invalid alert class.') );
-            }
-            elseif(!$pvp_alert_message  || empty($pvp_alert_message) || !Validate::isMessage($pvp_alert_message))  {
-                $output .= $this->displayError( $this->l('Invalid alert message.') );
-            }                
-            else
+            $pvp_alert_class = (string)Tools::getValue('PVP_ALERT_CLASS');
+            $pvp_alert_message = (string)Tools::getValue('PVP_ALERT_MESSAGE');
+            if (!$pvp_alert_class || empty($pvp_alert_class) || !Validate::isGenericName($pvp_alert_class))
+                $output .= $this->displayError($this->l('Invalid alert class.'));
+            if (!$pvp_alert_message || empty($pvp_alert_message) || !Validate::isMessage($pvp_alert_message))
+                $output .= $this->displayError($this->l('Invalid alert message.'));         
+            if ($output === null)
             {
                 Configuration::updateValue('PVP_ALERT_CLASS', $pvp_alert_class);
                 Configuration::updateValue('PVP_ALERT_MESSAGE', $pvp_alert_message);
@@ -89,13 +107,14 @@ class HolidayAlert extends Module
         }
         return $output.$this->displayForm();
     }
-    
+
     public function displayForm()
     {
         // Get default Language
         $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
 
         // Init Fields form array
+	$fields_form = array();
         $fields_form[0]['form'] = array(
             'legend' => array(
                 'title' => $this->l('Settings'),
@@ -105,7 +124,7 @@ class HolidayAlert extends Module
                     'type' => 'select',
                     'label' => $this->l('Alert class'),
                     'name' => 'PVP_ALERT_CLASS',
-                    'options' => array(                                  
+                    'options' => array(                            
                         'query' => array(
                             array(
                                 'id_option' => 'danger',
@@ -178,6 +197,6 @@ class HolidayAlert extends Module
 
         return $helper->generateForm($fields_form);
     }
-    
+
 }
 ?>
