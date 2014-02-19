@@ -13,7 +13,7 @@ During Christmas time a client wanted to show an alert to his costumers because 
 
 ### Configuration
 
-* You can choose among four classes to colour the box: success (green), info (blue), warning (yellow) and warning (red).
+* You can choose among four classes to colour the box: success (green), info (blue), warning (yellow) and danger (red).
 * You can edit the displayed message.
 
 ### Hooks
