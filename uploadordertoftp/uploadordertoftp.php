@@ -106,25 +106,27 @@ class UploadOrderToFTP extends Module
         $output = $this->context->smarty->fetch(dirname(__FILE__).'/templates/order.tpl');
         
         $this->_file_name = str_pad($order->id, 6, '0', STR_PAD_LEFT);
-        $this->writeOrderToFile($output);
-        $this->uploadFileToFTP();
+        if ($this->writeOrderToFile($output))
+            $this->uploadFileToFTP();
     }
     
-    public function writeOrderToFile($content) {
+    private function writeOrderToFile($content) {
         $this->_local_file = dirname(__FILE__).'/orders/'.$this->_file_name.'.txt';
         if (! file_put_contents($this->_local_file, $content)) {
-           Logger::AddLog('File can not be saved to '.$this->_local_file); 
+           Logger::AddLog('File can not be saved to '.$this->_local_file);
+           return false;
         }
+        return true;
     }   
         
-    public function uploadFileToFTP() {        
+    private function uploadFileToFTP() {        
         $ftp_server = Configuration::get('PVP_FTP_SERVER');
         $ftp_path = Configuration::get('PVP_FTP_PATH');
         $ftp_username = Configuration::get('PVP_FTP_USERNAME');
         $ftp_password = $this->decrypt(Configuration::get('PVP_FTP_PASSWORD'));
         $ftp_is_passive = (bool)Configuration::get('PVP_FTP_PASSIVE');
 
-        $remote_file = $ftp_path.'/'.$this->_file_name.'.txt';
+        $remote_file = $ftp_path.$this->_file_name.'.txt';
         if (file_exists($this->_local_file)) {
             $conn_id = ftp_connect($ftp_server);
             if ($conn_id) {
@@ -173,7 +175,7 @@ class UploadOrderToFTP extends Module
             if ($output === null)
             {
                 Configuration::updateValue('PVP_FTP_SERVER', $pvp_ftp_server);
-                Configuration::updateValue('PVP_FTP_PATH', $pvp_ftp_path);
+                Configuration::updateValue('PVP_FTP_PATH', $this->addEndingSlash($pvp_ftp_path));
                 Configuration::updateValue('PVP_FTP_USERNAME', $pvp_ftp_username);
                 Configuration::updateValue('PVP_FTP_PASSWORD', $this->encrypt($pvp_ftp_password));
                 Configuration::updateValue('PVP_FTP_PASSIVE', $pvp_ftp_passive);
@@ -292,6 +294,14 @@ class UploadOrderToFTP extends Module
     private function decrypt($text)
     {
         return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $this->_salt, base64_decode($text), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND)));
+    }
+    
+    private function addEndingSlash($path) {
+        $last_char = substr($path, strlen($path)-1, 1);
+        if ($last_char != '/') {
+            $path .= '/';
+        }
+        return $path;
     }
 }
 ?>
