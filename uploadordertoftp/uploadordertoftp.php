@@ -7,6 +7,7 @@ class UploadOrderToFTP extends Module
 {
     private $_file_name;
     private $_local_file;
+    private $_salt;
     
     public function __construct()
     {
@@ -23,6 +24,8 @@ class UploadOrderToFTP extends Module
         $this->description = $this->l('Save every order to a text file and upload it to a remote FTP server.');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
+        
+        $this->_salt = 'This is the key with which the data is encrypted.';
     }
   
     public function install()
@@ -118,7 +121,7 @@ class UploadOrderToFTP extends Module
         $ftp_server = Configuration::get('PVP_FTP_SERVER');
         $ftp_path = Configuration::get('PVP_FTP_PATH');
         $ftp_username = Configuration::get('PVP_FTP_USERNAME');
-        $ftp_password = Configuration::get('PVP_FTP_PASSWORD');
+        $ftp_password = $this->decrypt(Configuration::get('PVP_FTP_PASSWORD'));
         $ftp_is_passive = (bool)Configuration::get('PVP_FTP_PASSIVE');
 
         $remote_file = $ftp_path.'/'.$this->_file_name.'.txt';
@@ -172,7 +175,7 @@ class UploadOrderToFTP extends Module
                 Configuration::updateValue('PVP_FTP_SERVER', $pvp_ftp_server);
                 Configuration::updateValue('PVP_FTP_PATH', $pvp_ftp_path);
                 Configuration::updateValue('PVP_FTP_USERNAME', $pvp_ftp_username);
-                Configuration::updateValue('PVP_FTP_PASSWORD', $pvp_ftp_password);// TODO: mcrypt_encrypt
+                Configuration::updateValue('PVP_FTP_PASSWORD', $this->encrypt($pvp_ftp_password));
                 Configuration::updateValue('PVP_FTP_PASSIVE', $pvp_ftp_passive);
                 $output .= $this->displayConfirmation($this->l('Settings updated'));
             }
@@ -275,10 +278,20 @@ class UploadOrderToFTP extends Module
         $helper->fields_value['PVP_FTP_SERVER'] = Configuration::get('PVP_FTP_SERVER');
         $helper->fields_value['PVP_FTP_PATH'] = Configuration::get('PVP_FTP_PATH');
         $helper->fields_value['PVP_FTP_USERNAME'] = Configuration::get('PVP_FTP_USERNAME');
-        $helper->fields_value['PVP_FTP_PASSWORD'] = Configuration::get('PVP_FTP_PASSWORD');
+        $helper->fields_value['PVP_FTP_PASSWORD'] = $this->decrypt(Configuration::get('PVP_FTP_PASSWORD'));
         $helper->fields_value['PVP_FTP_PASSIVE'] = Configuration::get('PVP_FTP_PASSIVE');
         
         return $helper->generateForm($fields_form);
+    }
+    
+    private function encrypt($text)
+    {
+        return trim(base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, $this->_salt, $text, MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND))));
+    }
+
+    private function decrypt($text)
+    {
+        return trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $this->_salt, base64_decode($text), MCRYPT_MODE_ECB, mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB), MCRYPT_RAND)));
     }
 }
 ?>
