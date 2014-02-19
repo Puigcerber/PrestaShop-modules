@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <module>
+            <name>uploadordertoftp</name>
+            <displayName><![CDATA[Upload order to FTP]]></displayName>
+            <version><![CDATA[1.0]]></version>
+            <description><![CDATA[Save every order to a text file and upload it to a remote FTP server.]]></description>
+            <author><![CDATA[Pablo Villoslada Puigcerber]]></author>
+            <tab><![CDATA[billing_invoicing]]></tab>
+	<confirmUninstall>Are you sure you want to uninstall?</confirmUninstall>
+            <is_configurable>1</is_configurable>
+            <need_instance>0</need_instance>
+	<limited_countries></limited_countries>
+        </module>
