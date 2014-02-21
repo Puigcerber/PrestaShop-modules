@@ -23,4 +23,4 @@ During Christmas time a client wanted to show an alert to his costumers because 
 
 ## Comments
 
-If you are using this module you can show me some love and leave a comment in my [blog](http://puigcerber.wordpress.com/2014/02/12/holiday-alert-module-for-prestashop/).
+If you are using this module you can show me some love and leave a comment on my [blog](http://puigcerber.wordpress.com/2014/02/12/holiday-alert-module-for-prestashop/).
