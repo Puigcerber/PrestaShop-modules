@@ -28,6 +28,7 @@ class UploadOrderToFTP extends Module {
 
 	private $file_name;
 	private $local_file;
+	private $order_id;
 
 	public function __construct()
 	{
@@ -68,6 +69,7 @@ class UploadOrderToFTP extends Module {
 	{
 		$currency = $params['currency'];
 		$order = $params['order'];
+		$this->order_id = (int)$order->id;
 		$customer = $params['customer'];
 		$delivery = new Address((int)$order->id_address_delivery);
 		$invoice = new Address((int)$order->id_address_invoice);
@@ -132,7 +134,7 @@ class UploadOrderToFTP extends Module {
 		$this->local_file = dirname(__FILE__).'/orders/'.$this->file_name.'.txt';
 		if (!file_put_contents($this->local_file, $content))
 		{
-			Logger::AddLog('File can not be saved to '.$this->local_file);
+			Logger::AddLog('File could not be saved to '.$this->local_file, 3, null, 'order', $this->order_id);
 			return false;
 		}
 		return true;
@@ -157,12 +159,12 @@ class UploadOrderToFTP extends Module {
 				if ($login_result)
 				{
 					if (!ftp_put($conn_id, $remote_file, $this->local_file, FTP_ASCII))
-						Logger::AddLog('There was a problem uploading '.$remote_file);
+						Logger::AddLog('There was a problem uploading '.$remote_file, 3, null, 'order', $this->order_id);
 				} else
-					Logger::AddLog('Could not connect as '.$ftp_username);
+					Logger::AddLog('Could not connect as '.$ftp_username, 3, null, 'order', $this->order_id);
 				ftp_close($conn_id);
 			} else
-				Logger::AddLog('Could not connect to '.$ftp_server);
+				Logger::AddLog('Could not connect to '.$ftp_server, 3, null, 'order', $this->order_id);
 		}
 	}
 
